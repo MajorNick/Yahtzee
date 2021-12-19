@@ -55,7 +55,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		int[][] score = new int[nPlayers][17];
 		boolean[] diceindex = new boolean[N_DICE];
 		int[] dice = new int[N_DICE];
-		
+		int[] lastscores = new int [nPlayers];
 		
 		for(int j = 0;j<13;j++) {
 			for(int i = 0;i<nPlayers;i++) {
@@ -69,7 +69,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 				int k = display.waitForPlayerToSelectCategory();
 		
 				if(category[i][k]!=0) {				
-					chooseAnother(k,category,i);
+					 k = chooseAnother(k,category,i);
 				}
 				
 				score1 = getScoreFromCategory(k,dice);
@@ -80,8 +80,8 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			}
 		}
 		
-		addlastscores(score,nPlayers);
-		winner(score,nPlayers,playerNames);
+		addlastscores(score,nPlayers,lastscores);
+		winner(score,nPlayers,playerNames,lastscores);
 	}	
 	/*
 	 * with this i am making boolean array, for rolls.
@@ -193,7 +193,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			makeTestArray(dice,test);
 			
 			int k2=0,k3=0;
-			for(int i=0;i<N_DICE;i++) {
+			for(int i=0;i<7;i++) {
 				
 				if(test[i]==2)	k2++;
 				if(test[i]==3)	k3++;
@@ -255,7 +255,7 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 		return cnt;
 	}
 	// add scores to display, and if lower score >63 add bonus.
-	private void addlastscores(int[][] score,int nplayers) {
+	private void addlastscores(int[][] score,int nplayers,int[] lastscores) {
 		
 		
 		for(int i=0;i<nplayers;i++) {
@@ -276,12 +276,12 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			 display.updateScorecard(LOWER_SCORE,i+1,lower);		 
 			 display.updateScorecard(TOTAL,i+1,upper+lower+bonus);
 			 
-			 
+			 lastscores[i] = upper + lower + bonus;
 		}
 		
 	}
-	// choose another category, while it is already taken
-	private void chooseAnother(int k,int[][] category,int player) {
+	// choose another category, while it is already taken,
+	private int chooseAnother(int k,int[][] category,int player) {
 		
 		display.printMessage("Choose Another Category");
 		while(category[player][k]>0) {
@@ -289,22 +289,24 @@ public class Yahtzee extends GraphicsProgram implements YahtzeeConstants {
 			k = display.waitForPlayerToSelectCategory();
 			display.printMessage("Choose Another Category");
 		}
+		return k;
 	}
 	// finding max score and getting winners name
-	private void winner(int[][] score,int nPlayers,String[] players) {
+	private void winner(int[][] score,int nPlayers,String[] players,int[] lastscores) {
 		
 		int playerindex = 0;
 		int maxscore  = 0;
 		
 		for(int i=0;i<nPlayers;i++) {
 			
-			if(score[i][TOTAL]>maxscore) {
+			
+			if(lastscores[i]>maxscore) {
 				
 				playerindex = i;
-				maxscore = score[i][TOTAL];
+				maxscore = lastscores[i];
 			}
 		}
-		display.printMessage("The Winner Is: " + players[playerindex+1] + " With " + maxscore + " Point!");
+		display.printMessage("The Winner Is: " + players[playerindex] + " With " + maxscore + " Point!");
 	//	return;
 	}
 
